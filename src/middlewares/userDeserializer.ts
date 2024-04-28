@@ -5,7 +5,7 @@ import { config } from "dotenv";
 import { APIError } from "../errors/APIError";
 import { cookieConfig } from "../configs/cookieConfig";
 import { verifyJWT, signJWT } from "../lib/jwt.util";
-import { generateJWTUser } from "../lib/generateJWTUser";
+
 config({ path: `.env.${process.env.NODE_ENV}` });
 
 async function userDeserializer(
@@ -17,10 +17,7 @@ async function userDeserializer(
 	if (!access_token && !refresh_token) {
 		return next();
 	}
-	const { payload, expired } = verifyJWT(
-		access_token,
-		process.env.TOKEN_SECRET as string
-	);
+	const { payload, expired } = verifyJWT(access_token);
 
 	// For a valid access token
 	if (payload) {
@@ -32,7 +29,7 @@ async function userDeserializer(
 	// expired but valid access token
 	const { payload: refresh, expired: refresh_expiry } =
 		expired && refresh_token
-			? verifyJWT(refresh_token, process.env.TOKEN_SECRET as string)
+			? verifyJWT(refresh_token)
 			: { payload: null, expired: false };
 
 	if (refresh_expiry) {
@@ -50,11 +47,10 @@ async function userDeserializer(
 	}
 
 	try {
-		const newAccessToken = signJWT(
-			generateJWTUser(refresh),
-			"5s",
-			process.env.TOKEN_SECRET as string
-		);
+		delete refresh.iat;
+		delete refresh.exp;
+
+		const newAccessToken = signJWT(refresh, "5m");
 
 		res.cookie(
 			"access_token",
@@ -62,10 +58,7 @@ async function userDeserializer(
 			cookieConfig({ maxAge: 300000 })
 		);
 
-		const { payload } = verifyJWT(
-			newAccessToken,
-			process.env.TOKEN_SECRET as string
-		);
+		const { payload } = verifyJWT(newAccessToken);
 
 		// @ts-expect-error: User not authenticated, handling in middleware
 		req.user = payload;

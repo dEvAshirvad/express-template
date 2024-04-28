@@ -1,3 +1,5 @@
+import { format } from "date-fns";
+
 const timestamp = new Date().toISOString();
 
 interface IHttpResponse {
@@ -45,7 +47,7 @@ export class APIError extends Error {
 			message: this?.message,
 			success: this.success,
 			status: this.statusCode,
-			timestamp: timestamp,
+			timestamp: format(timestamp, "PPP p"),
 		} satisfies IHttpResponse;
 	}
 

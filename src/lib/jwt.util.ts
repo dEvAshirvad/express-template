@@ -1,10 +1,12 @@
+import { config } from "dotenv";
 import jwt, { JwtPayload } from "jsonwebtoken";
+config({ path: `.env.${process.env.NODE_ENV}` });
 
 // sign jwt
 export function signJWT(
 	payload: object,
 	expiresIn: string | number,
-	secret: string
+	secret = process.env.TOKEN_SECRET as string
 ) {
 	return jwt.sign(payload, secret, { expiresIn });
 }
@@ -12,7 +14,7 @@ export function signJWT(
 // verify jwt
 export function verifyJWT(
 	token: string,
-	secret: string
+	secret = process.env.TOKEN_SECRET as string
 ): { payload: JwtPayload | null; expired: boolean } {
 	try {
 		const decoded = jwt.verify(token, secret);
