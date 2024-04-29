@@ -47,6 +47,11 @@ const USER_ERRORS: UserError = {
 		TITLE: "INVALID_CREDENTIALS",
 		MESSAGE: "Invalid email or password. Please try again.",
 	},
+	WRONG_PASSWORD: {
+		STATUS: 401,
+		TITLE: "WRONG_PASSWORD",
+		MESSAGE: "Wrong password. Please try again.",
+	},
 };
 
 export default USER_ERRORS;
